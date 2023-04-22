@@ -1,0 +1,6 @@
+#!/bin/bash
+set -eou pipefail
+
+gokite generate
+
+gotestsum --format-hide-empty-pkg -- ./... -race -coverprofile=coverage.txt -covermode=atomic

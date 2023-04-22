@@ -1,0 +1,55 @@
+#!/bin/bash
+set -eou pipefail
+
+source="${BASH_SOURCE[0]:-${(%):-%x}}"
+command_chain="$(basename "$source")"
+
+cmds() {
+  local source="${1:-}"
+
+  # Sets the environment variable root to the directory name of the current script
+  # or command that is being executed.
+  root="$(dirname "$source")"
+  cmd="$(basename "$source")"
+
+  # List all the commands in the dol.d directory.
+  find "${root}/${cmd}.d" -maxdepth 1 -type f -print0 | xargs -0 -n1 basename | sort
+}
+
+cmd() {
+  local source="${1:-}"
+  local cmd="${2:-}"
+
+  # Sets the environment variable root to the directory name of the current script
+  # or command that is being executed.
+  root="$(dirname "$source")"
+  base="$(basename "$source")"
+
+  echo "${root}/${base}.d/${cmd}"
+}
+
+usage() {
+  cat <<EOF
+Gokite is a tool for managing your Go development environment.
+
+Usage:
+
+   $command_chain <command> [arguments]
+
+The commands are:
+
+$(cmds "$source" | while read -r line; do echo -e "   ${line}"; done)
+
+EOF
+  exit 1
+}
+
+[[ $# -lt 1 ]] && usage
+
+action="${1:-}"
+module="$(cmd "$source" "$action")"
+echo "$module" >&2
+test -x "$module" || usage
+
+shift
+source "$module"

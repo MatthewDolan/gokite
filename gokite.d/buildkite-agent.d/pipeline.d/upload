@@ -1,0 +1,8 @@
+#!/bin/bash
+set -eou pipefail
+
+buildkite-agent pipeline upload <<EOF
+steps:
+  - label: ":golang: lint"
+    command: "gokite lint"
+EOF
